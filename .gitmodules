@@ -10,3 +10,6 @@
 [submodule "Toolboxes/capturability-sos"]
 	path = Toolboxes/capturability-sos
 	url = git@github.com:tkoolen/capturability-sos.git
+[submodule "Toolboxes/--recursive"]
+	path = Toolboxes/--recursive
+	url = git@github.com:sqlp/sdpt3.git
