@@ -13,3 +13,6 @@
 [submodule "Toolboxes/--recursive"]
 	path = Toolboxes/--recursive
 	url = git@github.com:sqlp/sdpt3.git
+[submodule "Toolboxes/--force"]
+	path = Toolboxes/--force
+	url = git@github.com:sqlp/sdpt3.git
