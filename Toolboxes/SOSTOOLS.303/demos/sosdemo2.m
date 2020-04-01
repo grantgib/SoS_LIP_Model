@@ -34,6 +34,7 @@ prog = sosineq(prog,expr);
 solver_opt.solver = 'sedumi';
 prog = sossolve(prog,solver_opt);
 
+
 % =============================================
 % Finally, get solution
 SOLV = sosgetsol(prog,V)

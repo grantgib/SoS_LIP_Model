@@ -7,3 +7,6 @@
 [submodule "Toolboxes/sdpt3"]
 	path = Toolboxes/sdpt3
 	url = git@github.com:sqlp/sdpt3.git
+[submodule "Toolboxes/capturability-sos"]
+	path = Toolboxes/capturability-sos
+	url = git@github.com:tkoolen/capturability-sos.git
