@@ -25,9 +25,9 @@ z_bar = 1;      % CoM height
 % xdot = [x2; (grav/z_bar)*(x1 + r_foot*u1)];
 f_original = [x2; (grav/z_bar)*x1];
 g_original = [0; (grav/z_bar)];
-scale = (grav/z_bar);
-f_tilde = f_original./scale;
-g_tilde = g_original./scale;
+% scale = (grav/z_bar);
+% f_tilde = f_original./scale;
+% g_tilde = g_original./scale;
 
 disp('Dynamics');
 
@@ -50,19 +50,19 @@ disp('SOS program and vars');
 %% =============================================
 % Constraints
 jacV = jacobian(V,x);
-% constr1 = -jacV*f_original - 1*p - sigma_R*(R^2 - x'*x);     % need to define variables p, sigma_R
-constr1 = -jacV*f_tilde - 1*p - sigma_R*(R^2 - x'*x);     % need to define variables p, sigma_R
+constr1 = -jacV*f_original - 1*p - sigma_R*(R^2 - x'*x);     % need to define variables p, sigma_R
+% constr1 = -jacV*f_tilde - 1*p - sigma_R*(R^2 - x'*x);     % need to define variables p, sigma_R
 prog = sosineq(prog,constr1);
 
 constr2 = V; %
 prog = sosineq(prog,constr2);
 
-% constr3 = p - jacV*g_original - sigma_p*(R^2-x'*x);
-constr3 = p - jacV*g_tilde - sigma_p*(R^2-x'*x);
+constr3 = p - jacV*g_original - sigma_p*(R^2-x'*x);
+% constr3 = p - jacV*g_tilde - sigma_p*(R^2-x'*x);
 prog = sosineq(prog,(constr3));
 
-% constr4 = p + jacV*g_original - sigma_n*(R^2-x'*x);
-constr4 = p + jacV*g_tilde - sigma_n*(R^2-x'*x);
+constr4 = p + jacV*g_original - sigma_n*(R^2-x'*x);
+% constr4 = p + jacV*g_tilde - sigma_n*(R^2-x'*x);
 prog = sosineq(prog,(constr4));
 
 % constr5 = W
