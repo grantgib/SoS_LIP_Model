@@ -8,12 +8,11 @@ addpath(genpath('../Toolboxes/sedumi'));
 clear; clc;
 
 % Initialize symbolics and other variables
-syms x1 x2 p sigma_R sigma_p sigma_n 'real'
+syms x1 x2 p sigma_R sigma_p sigma_n t 'real'
 Q = sym('Q',[2,2]);
 x = [x1; x2];
 % V = x'*Q*x; %note since this is 2 states it's actually SOS
 
-ep = 0.1;
 R = 1;
 disp('Symbolics');
 
@@ -24,7 +23,7 @@ r_foot = 0.05;  % stance foot max width
 z_bar = 1;      % CoM height
 % xdot = [x2; (grav/z_bar)*(x1 + r_foot*u1)];
 f_original = [x2; (grav/z_bar)*x1];
-g_original = [0; (grav/z_bar)];
+g_original = [0; (grav/z_bar)*r_foot];
 % scale = (grav/z_bar);
 % f_tilde = f_original./scale;
 % g_tilde = g_original./scale;
@@ -34,16 +33,18 @@ disp('Dynamics');
 %% =============================================
 % First, initialize the sum of squares program
 prog = sosprogram(x);
+% prog = sosprogram([x;t]);
 
 % Declare decision variables
-vars =  [p; sigma_R; sigma_p; sigma_n];
-syms a b;
+vars =  [sigma_R; sigma_p; sigma_n];
 % vars2 = [a;b];
 prog = sosdecvar(prog, vars);
 
 % The W(x): 
-[prog,W] = sossosvar(prog,[x1; x2],'wscoeff');
-[prog,V] = sossosvar(prog,[x1; x2],'wscoeff');
+[prog,W] = sossosvar(prog,[x1; x2],'wscoeff');  % constr 5
+% [prog,V] = sospolyvar(prog, monomials([1; x1; x2;t],2));
+[prog,V] = sospolyvar(prog, monomials([1; x1; x2],2));
+[prog,p] = sospolyvar(prog, monomials([x1; x2],2:4));
 
 disp('SOS program and vars');
 
@@ -51,22 +52,17 @@ disp('SOS program and vars');
 % Constraints
 jacV = jacobian(V,x);
 constr1 = -jacV*f_original - 1*p - sigma_R*(R^2 - x'*x);     % need to define variables p, sigma_R
-% constr1 = -jacV*f_tilde - 1*p - sigma_R*(R^2 - x'*x);     % need to define variables p, sigma_R
+% constr1 = -jacobian(V,t) - jacV*f_original - 1*p - sigma_R*(R^2 - x'*x);     % need to define variables p, sigma_R
 prog = sosineq(prog,constr1);
 
-constr2 = V; %
+constr2 = subs(V,[x1;x2],[0;0]); %
 prog = sosineq(prog,constr2);
 
-constr3 = p - jacV*g_original - sigma_p*(R^2-x'*x);
-% constr3 = p - jacV*g_tilde - sigma_p*(R^2-x'*x);
+constr3 = p - jacV*g_original - sigma_p*(R^2-x'*x); % assume m = 1
 prog = sosineq(prog,(constr3));
 
 constr4 = p + jacV*g_original - sigma_n*(R^2-x'*x);
-% constr4 = p + jacV*g_tilde - sigma_n*(R^2-x'*x);
 prog = sosineq(prog,(constr4));
-
-% constr5 = W
-prog = sosineq(prog,W);
 
 % constr6 = W - V - 1
 prog = sosineq(prog,W-V-1);
