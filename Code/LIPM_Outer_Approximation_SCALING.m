@@ -6,6 +6,7 @@ addpath(genpath('../Toolboxes/sedumi'));
 
 %% =============================================
 clear; clc;
+
 % Initialize symbolics and other variables
 syms x1 x2 p sigma_R sigma_p sigma_n 'real'
 x = [x1; x2];
@@ -19,12 +20,19 @@ disp('Symbolics');
 
 %% =============================================
 % Dynamics in control affine form --> xdot = f(x) + g(x)*u. (f is the drift vector)
-% xdot = [x2; (grav/z_bar)*(x1 + r_foot*u1)];
 grav = 9.81;       % gravity
 r_foot = 0.05;  % stance foot max width
 z_bar = 1;      % CoM height
-f_x = [x2; (grav/z_bar)*x1];
-g_x = [0; (grav/z_bar)*r_foot];
+
+%scaling the states
+xdim = x.*[1/z_bar;1/(grav*z_bar)^0.5];
+% x = x.*[1/z_bar;1/(grav*z_bar)^0.5];
+
+% xdot = [x2; (grav/z_bar)*(x1 + r_foot*u1)];
+f_original = [xdim(2); (grav/z_bar)*xdim(1)];
+g_original = [0; (grav/z_bar)*r_foot];
+
+
 disp('Dynamics');
 
 %% =============================================
@@ -50,16 +58,16 @@ end
 %% =============================================
 % Constraints
 jacV = jacobian(V,x);
-constr1 = -jacV*f_x - 1*p - sigma_R*(R^2 - x'*x);     % need to define variables p, sigma_R
+constr1 = -jacV*f_original - 1*p - sigma_R*(R^2 - xdim'*xdim);     % need to define variables p, sigma_R
 prog = sosineq(prog,constr1);
 
 constr2 = subs(V,[x1;x2],[0;0]); %
 prog = sosineq(prog,constr2);
 
-constr3 = p - jacV*g_x - sigma_p*(R^2-x'*x); % assume m = 1
+constr3 = p - jacV*g_original - sigma_p*(R^2-xdim'*xdim); % assume m = 1
 prog = sosineq(prog,(constr3));
 
-constr4 = p + jacV*g_x - sigma_n*(R^2-x'*x);
+constr4 = p + jacV*g_original - sigma_n*(R^2-xdim'*xdim);
 prog = sosineq(prog,(constr4));
 
 % constr6 = W - V - 1
@@ -94,27 +102,21 @@ figure;
 fsurf(V_opt);
 xlim([-0.5 0.5]);
 ylim([-1 1]);
-zlim([0 inf]);
-title("V_{opt} Outer Approximation (R = " + R + ")");
+zlim([0 inf]); title("V_{opt} Outer Approximation (R = " + R + ")");
 
-% disp("*************** V_OPT w/ SCALE RESULTS *****************");
-% scale
-a = 2.5;
-b = 1;
-V_opt = subs(V_opt,[x1,x2],[a*(x1/z_bar),b*(x2/sqrt(grav*z_bar))]);
-disp("Vopt = "); disp(V_opt)
-[coeff_V,mono_V] = coeffs(V_opt, [x1 x2], 'All');
-coeff_V = double(coeff_V); 
-disp("Coefficients of V = "); disp(coeff_V);
-disp("Monomials of V = "); disp(mono_V);
-disp("*************** PLOT RESULTS *****************");
-figure;
-fsurf(V_opt);
-xlim([-0.5 0.5]);
-ylim([-1 1]);
-zlim([0 inf]); 
-title("V_{opt} Outer Approximation (R = " + R + ")");
-
+% disp("*************** W_OPT RESULTS *****************");
+% disp("Wopt = "); disp(W_opt)
+% [coeff_W,mono_W] = coeffs(W_opt, [x1 x2], 'All');
+% coeff_W = double(coeff_W); 
+% disp("Coefficients of W = "); disp(coeff_W);
+% disp("Monomials of W = "); disp(mono_W);
+% disp("*************** W_OPT PLOT RESULTS *****************");
+% figure;
+% fsurf(W_opt);
+% xlim([-0.5 0.5]);
+% ylim([-1 1]);
+% zlim([0 inf]);
+% 
 
 
 
