@@ -9,12 +9,7 @@ clear; clc;
 % Initialize symbolics and other variables
 syms x1 x2 p sigma_R sigma_p sigma_n 'real'
 x = [x1; x2];
-
-% R = 2;
-% R = 1; % too small
-% R = 0.1; % too large
-% R = 0.5; % too large
-R = 0.1;
+R = 2;
 disp('Symbolics');
 
 %% =============================================
@@ -35,17 +30,17 @@ prog = sosprogram(x);
 vars =  [sigma_R; sigma_p; sigma_n];
 prog = sosdecvar(prog, vars);
 
-use_quartic = 0;
-if use_quartic
+poly_deg = 2;
+if poly_deg == 4
     [prog,W] = sossosvar(prog,[1; x1; x2; x1^2; x1*x2; x2^2],'wscoeff');  % constr 5
-    [prog,V] = sospolyvar(prog, monomials([1; x1; x2],4));
-    [prog,p] = sospolyvar(prog, monomials([1; x1; x2],4));
-else
-    [prog,W] = sossosvar(prog,[1; x1; x2],'wscoeff');  % constr 5
-    [prog,V] = sospolyvar(prog, monomials([1; x1; x2],2));
-    [prog,p] = sospolyvar(prog, monomials([1; x1; x2],2));
+    [prog,V] = sospolyvar(prog, monomials([1; x1; x2],poly_deg));
+    [prog,p] = sospolyvar(prog, monomials([1; x1; x2],poly_deg));
+elseif poly_deg == 2
+    [prog,W] = sossosvar(prog,[1; x1; x2; x1^2; x1*x2; x2^2],'wscoeff');  % constr 5
+    [prog,V] = sospolyvar(prog, monomials([1; x1; x2],poly_deg));
+    [prog,p] = sospolyvar(prog, monomials([1; x1; x2],poly_deg));
 end
-    disp('SOS program and vars');
+disp('SOS program and vars');
 
 %% =============================================
 % Constraints
@@ -53,7 +48,7 @@ jacV = jacobian(V,x);
 constr1 = -jacV*f_x - 1*p - sigma_R*(R^2 - x'*x);     % need to define variables p, sigma_R
 prog = sosineq(prog,constr1);
 
-constr2 = subs(V,[x1;x2],[0;0]); %
+constr2 = subs(V - 0.01,[x1;x2],[0;0]); %
 prog = sosineq(prog,constr2);
 
 constr3 = p - jacV*g_x - sigma_p*(R^2-x'*x); % assume m = 1
@@ -96,24 +91,24 @@ xlim([-0.5 0.5]);
 ylim([-1 1]);
 zlim([0 inf]);
 title("V_{opt} Outer Approximation (R = " + R + ")");
-
+% 
 % disp("*************** V_OPT w/ SCALE RESULTS *****************");
-% scale
-a = 2.5;
-b = 1;
-V_opt = subs(V_opt,[x1,x2],[a*(x1/z_bar),b*(x2/sqrt(grav*z_bar))]);
-disp("Vopt = "); disp(V_opt)
-[coeff_V,mono_V] = coeffs(V_opt, [x1 x2], 'All');
-coeff_V = double(coeff_V); 
-disp("Coefficients of V = "); disp(coeff_V);
-disp("Monomials of V = "); disp(mono_V);
-disp("*************** PLOT RESULTS *****************");
-figure;
-fsurf(V_opt);
-xlim([-0.5 0.5]);
-ylim([-1 1]);
-zlim([0 inf]); 
-title("V_{opt} Outer Approximation (R = " + R + ")");
+% % scale
+% a = 1e6;
+% b = 1e6;
+% V_opt = subs(V_opt,[x1,x2],[a*(x1/z_bar),b*(x2/sqrt(grav*z_bar))]);
+% disp("Vopt = "); disp(V_opt)
+% [coeff_V,mono_V] = coeffs(V_opt, [x1 x2], 'All');
+% coeff_V = double(coeff_V); 
+% disp("Coefficients of V = "); disp(coeff_V);
+% disp("Monomials of V = "); disp(mono_V);
+% disp("*************** PLOT RESULTS *****************");
+% figure;
+% fsurf(V_opt);
+% xlim([-0.5 0.5]);
+% ylim([-1 1]);
+% zlim([0 inf]); 
+% title("V_{opt} Outer Approximation (R = " + R + ")");
 
 
 
