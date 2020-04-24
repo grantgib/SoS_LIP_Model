@@ -9,7 +9,7 @@ clear; clc;
 % Initialize symbolics and other variables
 syms x1 x2 p sigma_R sigma_p sigma_n 'real'
 x = [x1; x2];
-R = 2;
+R = 5;
 disp('Symbolics');
 
 %% =============================================
