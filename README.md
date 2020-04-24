@@ -5,4 +5,4 @@
 * The paper can be found [here](http://rss2017.lids.mit.edu/static/papers/09.pdf).
 
 ## Outer Approximation
-To solve the outer approximation of the viable-capture region for the LIP Model run [Code/LIPM_Outer_Approximation.m](https://github.com/grantgib/SoS_LIP_Model/blob/master/Code/LIPM_Outer_Approximation.m)
+To solve the outer approximation of the 0-step viable-capture region for the LIP Model run [Code/LIPM_Outer_0step.m](https://github.com/grantgib/SoS_LIP_Model/blob/master/Code/LIPM_Outer_0step.m). To solve the outer approximation of the 1-step viable-capture region run [Code/LIPM_Outer_Nstep.m](https://github.com/grantgib/SoS_LIP_Model/blob/master/Code/LIPM_Outer_Nstep.m). Note that the solution of the 0-step region is used to compute the 1-step solution. The barrier function solutions can be viewed directly by loading the .mat files.
